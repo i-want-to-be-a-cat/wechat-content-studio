@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -17,6 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("STUDIO_DATA_DIR", str(Path.home() / "Library/Application Support/WechatContentStudio")))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB = DATA_DIR / "studio.sqlite3"
+TEXT_API_BASE_URL = os.environ.get("TEXT_API_BASE_URL", "http://127.0.0.1:11434/v1").rstrip("/")
+TEXT_API_KEY = os.environ.get("TEXT_API_KEY", "ollama")
+TEXT_MODEL = os.environ.get("TEXT_MODEL", "qwen3:8b")
+IMAGE_PROVIDER = os.environ.get("IMAGE_PROVIDER", "comfyui")
+IMAGE_API_BASE_URL = os.environ.get("IMAGE_API_BASE_URL", "http://127.0.0.1:8188").rstrip("/")
+IMAGE_WORKFLOW_PATH = os.environ.get("IMAGE_WORKFLOW_PATH", "")
+STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY", "")
+STABILITY_ENGINE = os.environ.get("STABILITY_ENGINE", "stable-diffusion-xl-1024-v1-0")
 
 app = FastAPI(title="孤狼智写本地服务", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4173", "http://localhost:4173"], allow_methods=["*"], allow_headers=["*"])
@@ -71,9 +80,98 @@ class JobRequest(BaseModel):
     prompt: str = Field(default="", max_length=4000)
 
 
+class TextRequest(BaseModel):
+    kind: str = Field(pattern="^(titles|article|humanize)$")
+    prompt: str = Field(min_length=1, max_length=30000)
+    temperature: float = Field(default=0.85, ge=0, le=1.5)
+    max_tokens: int = Field(default=2200, ge=64, le=12000)
+
+
+class ImageRequest(BaseModel):
+    prompts: list[str] = Field(min_length=1, max_length=3)
+
+
 @app.get("/api/health")
 def health():
-    return {"data": {"status": "ok", "version": app.version, "storage": str(DB)}}
+    return {"data": {"status": "ok", "version": app.version, "storage": str(DB), "text_model": TEXT_MODEL, "image_provider": IMAGE_PROVIDER}}
+
+
+@app.get("/api/providers")
+def providers():
+    return {"data": {
+        "text": {"base_url": TEXT_API_BASE_URL, "model": TEXT_MODEL, "configured": bool(TEXT_API_BASE_URL and TEXT_MODEL)},
+        "image": {"provider": IMAGE_PROVIDER, "configured": bool(STABILITY_API_KEY or IMAGE_WORKFLOW_PATH)},
+    }}
+
+
+async def chat_completion(request: TextRequest) -> str:
+    headers = {"Authorization": f"Bearer {TEXT_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": TEXT_MODEL,
+        "messages": [
+            {"role": "system", "content": "你是中文公众号内容编辑。只输出用户要求的内容，不解释过程，不编造事实。"},
+            {"role": "user", "content": request.prompt},
+        ],
+        "temperature": request.temperature,
+        "max_tokens": request.max_tokens,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(f"{TEXT_API_BASE_URL}/chat/completions", headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("empty model response")
+            return content.strip()
+    except httpx.HTTPStatusError as exc:
+        detail = exc.response.text[:500]
+        raise HTTPException(502, f"TEXT_PROVIDER_ERROR: {detail}") from exc
+    except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+        raise HTTPException(502, f"TEXT_PROVIDER_UNAVAILABLE: {exc}") from exc
+
+
+@app.post("/api/generate/text")
+async def generate_text(request: TextRequest):
+    content = await chat_completion(request)
+    return {"data": {"kind": request.kind, "content": content, "model": TEXT_MODEL}}
+
+
+async def generate_stability(prompt: str) -> str:
+    if not STABILITY_API_KEY:
+        raise HTTPException(503, "IMAGE_PROVIDER_NOT_CONFIGURED: set STABILITY_API_KEY")
+    payload = {
+        "text_prompts": [{"text": prompt, "weight": 1}],
+        "width": 1024,
+        "height": 576,
+        "samples": 1,
+        "steps": 30,
+        "style_preset": "photographic",
+    }
+    headers = {"Authorization": f"Bearer {STABILITY_API_KEY}", "Accept": "application/json"}
+    try:
+        async with httpx.AsyncClient(timeout=180) as client:
+            response = await client.post(f"https://api.stability.ai/v1/generation/{STABILITY_ENGINE}/text-to-image", headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            encoded = data["artifacts"][0]["base64"]
+            return f"data:image/png;base64,{encoded}"
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(502, f"IMAGE_PROVIDER_ERROR: {exc.response.text[:500]}") from exc
+    except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+        raise HTTPException(502, f"IMAGE_PROVIDER_UNAVAILABLE: {exc}") from exc
+
+
+@app.post("/api/generate/images")
+async def generate_images(request: ImageRequest):
+    if IMAGE_PROVIDER == "stability":
+        images = [await generate_stability(prompt) for prompt in request.prompts]
+        return {"data": {"provider": IMAGE_PROVIDER, "images": images}}
+    if IMAGE_PROVIDER == "comfyui":
+        if not IMAGE_WORKFLOW_PATH:
+            raise HTTPException(503, "IMAGE_PROVIDER_NOT_CONFIGURED: set IMAGE_WORKFLOW_PATH to a ComfyUI API workflow")
+        raise HTTPException(501, "COMFYUI_WORKFLOW_ADAPTER_PENDING: configure the exported workflow mapping before use")
+    raise HTTPException(400, f"UNKNOWN_IMAGE_PROVIDER: {IMAGE_PROVIDER}")
 
 
 @app.get("/api/account")
