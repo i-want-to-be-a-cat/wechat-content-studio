@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>孤狼智写 · 内容创作工作台</title>
+  <style>
+    :root{--nav:#142940;--nav2:#1d3856;--blue:#1677ff;--blue2:#eaf3ff;--ink:#25313d;--muted:#7d8995;--line:#e5eaf0;--bg:#f4f7fb;--red:#f2664d;--green:#16b982;--purple:#7957ea}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0}body{min-width:1100px}
+    .app{min-height:100vh;display:flex}.sidebar{width:232px;min-width:232px;background:var(--nav);color:#d7e3f0;display:flex;flex-direction:column}.brand{height:198px;padding:28px 22px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)}.brand-logo{font-size:42px;line-height:1;color:#1784ff;text-shadow:0 0 22px rgba(23,132,255,.45);font-weight:900}.brand-name{margin-top:14px;color:#fff;font-size:25px;font-weight:850;letter-spacing:.03em}.brand-en{margin-top:7px;color:#9fb5cc;font-size:12px;letter-spacing:.14em}.nav{padding:28px 12px 0}.nav-label{margin:0 12px 10px;color:#7691aa;font-size:10px;letter-spacing:.18em;text-transform:uppercase}.nav-item{width:100%;height:50px;margin-bottom:7px;display:flex;align-items:center;gap:14px;padding:0 18px;border-left:3px solid transparent;border-radius:3px;background:transparent;color:#c6d4e2;text-align:left;font-size:14px}.nav-item:hover,.nav-item.active{background:var(--nav2);border-left-color:#2b86ff;color:#fff}.nav-icon{width:18px;text-align:center;color:#9bb0c6;font-size:16px}.nav-item.active .nav-icon{color:#53a5ff}.version{margin-top:auto;padding:18px;text-align:center;color:#738aa1;font-size:11px}
+    .main{flex:1;min-width:0;display:flex;flex-direction:column}.topline{height:30px;padding:10px 20px 0;background:#edf2f7}.progress{height:7px;border-radius:7px;background:#e2eaf2;overflow:hidden}.progress i{display:block;width:2%;height:100%;background:#d4e1ee}.percent{position:absolute;right:22px;top:10px;color:#687887;font-size:12px}
+    .toolbar{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;border-bottom:1px solid var(--line)}.toolbar-title{font-weight:800;font-size:15px}.toolbar-right{display:flex;gap:8px;align-items:center}.tiny{color:var(--muted);font-size:12px}.pill{padding:7px 10px;border:1px solid var(--line);background:#fff;border-radius:4px;color:#53616d;font-size:12px}.pill.blue{background:var(--blue);border-color:var(--blue);color:#fff}.pill.green{background:var(--green);border-color:var(--green);color:#fff}.pill.purple{background:var(--purple);border-color:var(--purple);color:#fff}.pill.orange{background:#ffb000;border-color:#ffb000;color:#fff}
+    .view{display:none;flex:1;min-height:0}.view.active{display:flex}.split{width:100%;display:grid;grid-template-columns:minmax(440px,.9fr) minmax(520px,1.1fr);gap:20px;padding:26px 26px 24px}.panel{background:#fff;border:1px solid var(--line);border-radius:3px;min-width:0;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(35,49,61,.03)}.panel-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head h2{margin:0;font-size:16px;color:#15202b}.pin{font-size:20px;color:#16202b}.panel-body{padding:16px;overflow:auto}.label{display:block;margin:0 0 8px;font-size:13px;color:#374653}.hint{margin:13px 0 8px;color:#525e68;font-size:13px}.input,.textarea,.select{width:100%;border:1px solid #e7ebef;border-radius:2px;outline:0;background:#fff;color:#394650;padding:9px 10px;font-size:13px}.input{height:38px}.textarea{min-height:84px;resize:vertical;line-height:1.7}.input:focus,.textarea:focus,.select:focus{border-color:#72a9ff;box-shadow:0 0 0 3px rgba(22,119,255,.08)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.control-row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}.control-row .label{margin:0}.select{width:auto;min-width:120px;height:37px}.primary{padding:10px 19px;border-radius:4px;background:#1b78ee;color:#fff;font-weight:700}.danger{padding:10px 19px;border-radius:4px;background:var(--red);color:#fff;font-weight:700}.softblue{padding:8px 12px;background:#eaf4ff;color:#146ad9;border-radius:4px;font-size:12px}.softred{padding:8px 12px;background:#fff0ec;color:#e05a40;border-radius:4px;font-size:12px}.hr{height:1px;background:var(--line);margin:15px 0}.result-space{flex:1;min-height:250px}.empty-result{height:100%;min-height:330px;display:grid;place-items:center;color:#aeb9c3;font-size:13px;text-align:center}.result-list{display:grid;gap:8px}.result-item{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:8px;padding:9px 10px;border:1px solid #edf0f3;border-radius:2px;background:#fff;font-size:13px}.check{width:18px;height:18px;accent-color:#1976ed}.x{color:#e05b45;background:transparent;font-size:17px}.doc{color:#71818e;background:transparent;font-size:16px}.bottom-actions{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--line)}
+    .batch-left{padding:24px 28px;overflow:auto}.batch-right{border-left:1px solid var(--line);padding:24px;display:flex;flex-direction:column;min-width:0}.subheading{font-size:14px;font-weight:800;color:#315c82;margin-bottom:14px}.topic-stack{display:grid;gap:7px}.topic-stack .input{height:38px}.add-row{display:flex;gap:8px;margin-top:8px}.counter{color:#6d7a85;font-size:12px;align-self:center}.hintbox{min-height:150px}.range-row{display:flex;align-items:center;gap:10px}.range-row input{flex:1}.range-value{width:42px;color:#66747e;font-size:12px}.big-start{width:100%;height:48px;margin-top:20px;font-size:15px;border-radius:4px;background:#1e73ef;color:#fff;font-weight:800}.generated-title{display:flex;align-items:center;justify-content:space-between}.generated-title h2{margin:0;font-size:15px}.article-count{font-size:12px;color:#75848e}.article-list{display:grid;gap:8px;margin-top:11px;max-height:235px;overflow:auto}.article-card{padding:10px 12px;border:1px solid #e3e9ef;background:#fff;display:flex;gap:9px;align-items:flex-start}.article-card.active{border-color:#4f99ff;background:#f4f9ff}.article-card strong{font-size:13px;line-height:1.5;font-weight:650;flex:1}.article-card small{color:#7f8c96;font-size:11px}.preview{flex:1;min-height:270px;margin-top:16px;border:1px solid #e6eaee;background:#fff;overflow:auto}.preview-inner{max-width:710px;margin:0 auto;padding:25px 30px 42px}.preview-title{margin:0 0 18px;font-size:22px;line-height:1.45;color:#202b34}.preview-meta{padding-bottom:15px;border-bottom:1px solid #edf0f2;color:#9aa3aa;font-size:11px}.preview-body{margin-top:18px;white-space:pre-line;color:#38434b;font-size:14px;line-height:2}.preview-toolbar{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .rewrite{padding:27px 32px;display:grid;grid-template-columns:minmax(430px,.8fr) minmax(550px,1.2fr);gap:24px;width:100%}.rewrite-main{min-width:0}.rewrite-preview{border-left:1px solid var(--line);padding-left:24px;min-width:0;display:flex;flex-direction:column}.textarea.large{min-height:520px;font-size:14px;line-height:1.9}.rewrite-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:10px}
+    .layout-view{padding:26px 32px;display:grid;grid-template-columns:minmax(460px,.95fr) minmax(480px,1.05fr);gap:26px;width:100%}.layout-editor{min-width:0}.layout-preview{background:#fff;border:1px solid var(--line);padding:20px;overflow:auto}.layout-preview-inner{max-width:530px;margin:auto}.style-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.layout-preview h1{font-size:28px;line-height:1.35;margin:18px 0}.layout-preview p{color:#424b52;line-height:2;font-size:14px;white-space:pre-line}.image-slot{height:170px;margin:16px 0;border:1px dashed #aeb8c0;background:linear-gradient(135deg,#eaf1f7,#f9fbfc);display:grid;place-items:center;color:#90a0ad;font-size:12px}.footer-actions{margin-top:auto;padding-top:18px;display:flex;justify-content:flex-end;gap:10px}
+    .toast{position:fixed;right:24px;bottom:24px;background:#203040;color:#fff;padding:11px 15px;border-radius:4px;font-size:12px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
+    @media (max-width:1200px){body{min-width:980px}.sidebar{width:205px;min-width:205px}.split{grid-template-columns:1fr 1fr;padding:20px}.rewrite{grid-template-columns:1fr 1fr;padding:20px}.layout-view{grid-template-columns:1fr 1fr;padding:20px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-logo">狼</div><div class="brand-name">孤狼智写</div><div class="brand-en">GULANG ZHIXIE</div></div>
+    <nav class="nav">
+      <div class="nav-label">AI CONTENT TOOLKIT</div>
+      <button class="nav-item" data-view="model"><span class="nav-icon">⌕</span>模型秘钥</button>
+      <button class="nav-item active" data-view="titles"><span class="nav-icon">◉</span>一键标题</button>
+      <button class="nav-item" data-view="batch"><span class="nav-icon">✦</span>批量原创</button>
+      <button class="nav-item" data-view="rewrite"><span class="nav-icon">╱</span>批量改写</button>
+      <button class="nav-item" data-view="universal"><span class="nav-icon">✹</span>万能改写</button>
+      <button class="nav-item" data-view="layout"><span class="nav-icon">◁</span>一键排版</button>
+      <button class="nav-item" data-view="help"><span class="nav-icon">▣</span>使用教程</button>
+    </nav>
+    <div class="version">v2.1.0</div>
+  </aside>
+  <main class="main">
+    <div class="topline"><div class="progress"><i id="progressBar"></i></div><span class="percent" id="percent">0%</span></div>
+    <div id="titles" class="view active">
+      <div class="split">
+        <section class="panel">
+          <div class="panel-head"><h2>⚑ 一键批量写标题（左）</h2><span class="pin">⌕</span></div>
+          <div class="panel-body">
+            <div class="hint">输入 1-5 个参考标题：</div>
+            <div class="topic-stack" id="titleLeft">
+              <input class="input title-input" placeholder="参考标题 1"><input class="input title-input" placeholder="参考标题 2"><input class="input title-input" placeholder="参考标题 3"><input class="input title-input" placeholder="参考标题 4"><input class="input title-input" placeholder="参考标题 5">
+            </div>
+            <div class="hint">约束词（可选，精确控制生成方向）：</div><input class="input" id="constraintLeft" placeholder="如：古代言情、铁路调图、养老金政策...">
+            <div class="control-row"><label class="label">标题样式：</label><select class="select" id="styleLeft"><option>延续标题风风</option><option>制造冲突感</option><option>疑问式标题</option></select><label class="label">生成数量：</label><select class="select" id="countLeft"><option>5</option><option>3</option><option>10</option></select></div>
+            <div class="control-row"><button class="primary" id="titleGenerateLeft">开始生成</button><button class="danger" id="titleClearLeft">清空全部</button></div>
+            <div class="hr"></div><div id="titleResultLeft" class="result-space"></div>
+          </div>
+          <div class="bottom-actions"><button class="softred" id="deleteLeft">▣ 删除全部</button><button class="softblue" id="importLeft">▣ 导入到批量原创</button></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>⚑ 一键批量写标题（右）</h2><span class="pin">⌕</span></div>
+          <div class="panel-body">
+            <div class="hint">输入 1-5 个参考标题：</div>
+            <div class="topic-stack" id="titleRight">
+              <input class="input title-input" placeholder="参考标题 1"><input class="input title-input" placeholder="参考标题 2"><input class="input title-input" placeholder="参考标题 3"><input class="input title-input" placeholder="参考标题 4"><input class="input title-input" placeholder="参考标题 5">
+            </div>
+            <div class="hint">约束词（可选，精确控制生成方向）：</div><input class="input" id="constraintRight" placeholder="如：古代言情、铁路调图、养老金政策...">
+            <div class="control-row"><label class="label">标题样式：</label><select class="select" id="styleRight"><option>延续标题风风</option><option>制造冲突感</option><option>疑问式标题</option></select><label class="label">生成数量：</label><select class="select" id="countRight"><option>5</option><option>3</option><option>10</option></select></div>
+            <div class="control-row"><button class="primary" id="titleGenerateRight">开始生成</button><button class="danger" id="titleClearRight">清空全部</button></div>
+            <div class="hr"></div><div id="titleResultRight" class="result-space"></div>
+          </div>
+          <div class="bottom-actions"><button class="softred" id="deleteRight">▣ 删除全部</button><button class="softblue" id="importRight">▣ 导入到批量原创</button></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="batch" class="view">
+      <div class="split">
+        <section class="panel"><div class="panel-head"><h2>批量原创</h2><span class="tiny">标题输入（最多 12 个）</span></div><div class="panel-body batch-left">
+          <div class="topic-stack" id="batchTopics"><input class="input batch-topic" placeholder="请输入标题 1"><input class="input batch-topic" placeholder="请输入标题 2"><input class="input batch-topic" placeholder="请输入标题 3"><input class="input batch-topic" placeholder="请输入标题 4"><input class="input batch-topic" placeholder="请输入标题 5"><input class="input batch-topic" placeholder="请输入标题 6"></div>
+          <div class="add-row"><button class="softblue" id="addTopic">＋ 添加标题</button><button class="softred" id="removeTopic">− 删除标题</button><span class="counter" id="topicCounter">6 / 12</span></div>
+          <div class="hint">字数控制</div><select class="select" id="wordLimit"><option value="800">800</option><option value="1200">1200</option><option value="1800">1800</option></select>
+          <div class="hint">自定义提示（可选）</div><textarea class="textarea hintbox" id="batchPrompt" placeholder="例如：用轻松但有观点的口吻，开头先给一个真实场景..."></textarea>
+          <div class="hint">每个标题生成文章数量</div><select class="select" id="articleCount"><option>1 篇</option><option>2 篇</option><option>3 篇</option></select>
+          <button class="big-start" id="batchGenerate">✦ 立即开始批量创作</button>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h2>生成结果预览</h2><span class="tiny" id="batchStatus">等待生成</span></div><div class="panel-body batch-right">
+          <div class="generated-title"><h2>文章列表</h2><span class="article-count" id="articleCountText">0 篇</span></div>
+          <div id="articleList" class="article-list"></div>
+          <div id="articlePreview" class="preview"><div class="empty-result">输入标题后点击「立即开始批量创作」<br>生成结果会在这里展示</div></div>
+          <div class="preview-toolbar"><button class="pill" id="copyArticle">▣ 复制当前</button><button class="pill green" id="sendLayout">◁ 发送排版</button><button class="pill blue" id="saveAll">▣ 保存全部</button></div>
+        </div></section>
+      </div>
+    </div>
+
+    <div id="rewrite" class="view"><div class="rewrite">
+      <section class="panel rewrite-main"><div class="panel-head"><h2>批量改写</h2><span class="tiny">粘贴需要改写的文章</span></div><div class="panel-body"><textarea class="textarea large" id="rewriteInput" placeholder="将原文粘贴到这里..."></textarea><div class="control-row"><label class="label">改写强度：</label><select class="select" id="rewriteLevel"><option>5</option><option>3</option><option>8</option></select><button class="primary" id="rewriteBtn">✦ 开始改写</button></div></div></section>
+      <section class="rewrite-preview"><div class="subheading">改写结果预览</div><div id="rewriteOutput" class="preview" style="margin:0"><div class="empty-result">改写后的文章会显示在这里</div></div><div class="rewrite-actions"><button class="pill" id="copyRewrite">▣ 复制结果</button><button class="pill green" id="rewriteToLayout">◁ 发送排版</button></div></section>
+    </div></div>
+
+    <div id="universal" class="view"><div class="rewrite"><section class="panel rewrite-main"><div class="panel-head"><h2>万能改写</h2><span class="tiny">标题、正文、语气一次调整</span></div><div class="panel-body"><label class="label">文章标题</label><input class="input" id="universalTitle" placeholder="请输入文章标题"><label class="label" style="margin-top:14px">文章正文</label><textarea class="textarea large" id="universalInput" placeholder="输入需要改写的内容..."></textarea><div class="control-row"><select class="select" id="universalTone"><option>更像真人表达</option><option>更有冲击力</option><option>更适合公众号</option></select><button class="primary" id="universalBtn">开始优化</button></div></div></section><section class="rewrite-preview"><div class="subheading">优化结果</div><div id="universalOutput" class="preview" style="margin:0"><div class="empty-result">优化结果会显示在这里</div></div></section></div></div>
+
+    <div id="layout" class="view"><div class="layout-view"><section class="panel layout-editor"><div class="panel-head"><h2>文章内容</h2><span class="tiny">编辑后实时预览</span></div><div class="panel-body"><div class="style-row"><label class="label">排版样式：</label><select class="select" id="layoutStyle"><option>文艺素简</option><option>清爽蓝白</option><option>极简黑白</option></select><label class="label">小标题字号：</label><select class="select"><option>18</option><option>20</option><option>16</option></select></div><label class="label" style="margin-top:18px">文章标题</label><input class="input" id="layoutTitle" value="为什么很多人学了 AI，工作却没有变轻松？"><label class="label" style="margin-top:14px">文章正文</label><textarea class="textarea large" id="layoutBody">真正决定效率的，从来不是你收藏了多少工具，而是你有没有把其中一个工具放进自己的工作流里。
+
+先从一个每周都会重复的任务开始。让 AI 帮你完成第一版，再把自己的判断补进去。
+
+当方法可以重复，效率才会真正成为你的能力。</textarea><div class="footer-actions"><button class="pill" id="clearLayout">清空全部</button><button class="pill green" id="exportLayout">▣ 批量导出</button></div></div></section><section class="layout-preview"><div class="subheading">排版预览</div><div class="layout-preview-inner" id="layoutPreview"></div></section></div></div>
+    <div id="model" class="view"><div class="layout-view"><section class="panel"><div class="panel-head"><h2>模型秘钥</h2><span class="tiny">本地保存</span></div><div class="panel-body"><p class="hint">接入模型后，可将本地模拟生成替换为真实 API 调用。</p><label class="label">模型服务</label><select class="select"><option>OpenAI 兼容接口</option><option>豆包大模型</option><option>DeepSeek</option></select><label class="label" style="margin-top:15px">API Key</label><input class="input" type="password" placeholder="sk-..."><label class="label" style="margin-top:15px">接口地址</label><input class="input" value="https://api.example.com/v1"><button class="primary" style="margin-top:18px" id="saveModel">保存配置</button></div></section></div></div>
+    <div id="help" class="view"><div class="layout-view"><section class="panel"><div class="panel-head"><h2>使用教程</h2><span class="tiny">3 步开始</span></div><div class="panel-body"><div class="result-item"><strong>1. 输入标题</strong><small>在一键标题或批量原创中填写一个或多个标题</small></div><div class="result-item"><strong>2. 开始生成</strong><small>根据你的提示词和字数控制生成内容</small></div><div class="result-item"><strong>3. 复制或排版</strong><small>将结果复制到公众号，或进入一键排版继续处理</small></div></div></section></div></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], toast=$('#toast');
+  function showToast(t){toast.textContent=t;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}
+  function setProgress(v){$('#progressBar').style.width=v+'%';$('#percent').textContent=v+'%'}
+  function titleItems(side, count, constraint){
+    const seed=$$(`#title${side} .title-input`).map(x=>x.value.trim()).filter(Boolean)[0]||'普通人如何用 AI 提升工作效率？';
+    const suffix=constraint?`｜${constraint}`:'';
+    const bases=[`为什么${seed.replace(/[？?]/g,'')}，结果却越来越忙？`,`别急着学 AI，先把${seed.replace(/[？?]/g,'')}这件事做对`,`我把${seed.replace(/[？?]/g,'')}拆成了 3 个步骤`,`真正拉开差距的，不是${seed.replace(/[？?]/g,'')}，而是这一点`,`当所有人都在谈${seed.replace(/[？?]/g,'')}，你要小心一个误区`,`用了 30 天 AI，我终于明白${seed.replace(/[？?]/g,'')}的答案`,`建议收藏：${seed.replace(/[？?]/g,'')}的高效做法`,`别让${seed.replace(/[？?]/g,'')}，变成你的新内耗`,`一个普通人的${seed.replace(/[？?]/g,'')}实战复盘`,`看懂这件事，你就知道${seed.replace(/[？?]/g,'')}为何重要`];
+    return bases.slice(0,Number(count)).map(x=>x+suffix)
+  }
+  function renderTitleResult(side, items){const el=$(`#titleResult${side}`);if(!items.length){el.innerHTML='<div class="empty-result">生成的标题会显示在这里</div>';return}el.innerHTML='<div class="result-list">'+items.map((x,i)=>`<div class="result-item"><input class="check" type="checkbox" checked><span>${x}</span><button class="x" data-remove="${side}-${i}">×</button><button class="doc" title="导入">▤</button></div>`).join('')+'</div>';el.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{b.parentElement.remove();showToast('已删除该标题')})}
+  function bindTitle(side){$(`#titleGenerate${side}`).onclick=()=>{setProgress(18);const items=titleItems(side,$(`#count${side}`).value,$(`#constraint${side}`).value.trim());renderTitleResult(side,items);setProgress(100);showToast(`已生成 ${items.length} 个标题`)};$(`#titleClear${side}`).onclick=()=>{$$(`#title${side} .title-input`).forEach(x=>x.value='');$(`#constraint${side}`).value='';renderTitleResult(side,[]);showToast('已清空')};$(`#delete${side}`).onclick=()=>{renderTitleResult(side,[]);showToast('已删除全部')};$(`#import${side}`).onclick=()=>{const values=[...$(`#titleResult${side} .result-item span`)].map(x=>x.textContent);if(!values.length){showToast('请先生成标题');return}$$('.batch-topic').forEach((x,i)=>{if(values[i])x.value=values[i]});$$('.nav-item').find(x=>x.dataset.view==='batch').click();showToast('已导入批量原创')}}
+  bindTitle('Left');bindTitle('Right');
+  $('#addTopic').onclick=()=>{const stack=$('#batchTopics'), n=stack.children.length;if(n>=12){showToast('最多添加 12 个标题');return}const el=document.createElement('input');el.className='input batch-topic';el.placeholder=`请输入标题 ${n+1}`;stack.append(el);$('#topicCounter').textContent=`${n+1} / 12`};$('#removeTopic').onclick=()=>{const stack=$('#batchTopics');if(stack.children.length<=1)return;stack.lastElementChild.remove();$('#topicCounter').textContent=`${stack.children.length} / 12`};
+  let generated=[];function renderArticles(){const list=$('#articleList');$('#articleCountText').textContent=generated.length+' 篇';list.innerHTML=generated.map((a,i)=>`<button class="article-card ${i===0?'active':''}" data-i="${i}"><span class="check">✓</span><strong>${a.title}</strong><small>${a.words} 字</small></button>`).join('');$$('.article-card').forEach(b=>b.onclick=()=>{ $$('.article-card').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderPreview(Number(b.dataset.i))});if(generated.length)renderPreview(0)}
+  function renderPreview(i){const a=generated[i];if(!a)return;$('#articlePreview').innerHTML=`<div class="preview-inner"><h1 class="preview-title">${a.title}</h1><div class="preview-meta">孤狼智写 · ${new Date().toLocaleDateString('zh-CN')} · 阅读 3 分钟</div><div class="preview-body">${a.body}</div></div>`}
+  $('#batchGenerate').onclick=()=>{const topics=$$('.batch-topic').map(x=>x.value.trim()).filter(Boolean);if(!topics.length){showToast('至少填写一个标题');return}const prompt=$('#batchPrompt').value.trim();generated=topics.map((t,i)=>({title:t,words:800+i*37,body:`${t}\n\n很多人以为，解决这个问题只需要一个工具。但真正决定结果的，往往是你如何理解自己的工作。\n\n先把复杂的事情拆成几个简单步骤，再把重复的部分交给工具处理。你不需要一开始就找到最完美的方法，只要先让第一版跑起来。\n\n${prompt||'真正有效的改变，通常从一个具体而微小的动作开始。'}\n\n最后，记得把有效的方法留下来。能重复使用的方法，才会变成你的能力。`}));renderArticles();$('#batchStatus').textContent='生成完成';setProgress(100);showToast(`已生成 ${generated.length} 篇文章`)};$('#copyArticle').onclick=()=>{const a=generated[0];if(!a){showToast('暂无文章');return}navigator.clipboard?.writeText(a.title+'\\n\\n'+a.body);showToast('内容已复制')};$('#saveAll').onclick=()=>showToast(generated.length?'已保存全部内容':'暂无可保存内容');$('#sendLayout').onclick=()=>{if(generated[0]){$('#layoutTitle').value=generated[0].title;$('#layoutBody').value=generated[0].body}$$('.nav-item').find(x=>x.dataset.view==='layout').click();showToast('已发送到排版')};
+  $('#rewriteBtn').onclick=()=>{const text=$('#rewriteInput').value.trim();if(!text){showToast('请先输入文章');return}const result=text.replace(/我觉得/g,'我更愿意相信').replace(/但是/g,'不过').replace(/所以/g,'因此');$('#rewriteOutput').innerHTML=`<div class="preview-inner"><div class="preview-body">${result}</div></div>`;showToast('改写完成')};$('#copyRewrite').onclick=()=>showToast('改写结果已复制');$('#rewriteToLayout').onclick=()=>{$('#layoutBody').value=$('#rewriteInput').value;$('.nav-item[data-view="layout"]').click();showToast('已发送到排版')};
+  $('#universalBtn').onclick=()=>{const text=$('#universalInput').value.trim();if(!text){showToast('请先输入内容');return}$('#universalOutput').innerHTML=`<div class="preview-inner"><h1 class="preview-title">${$('#universalTitle').value||'优化后的文章'}</h1><div class="preview-body">${text.replace(/\n/g,'\\n\\n')}</div></div>`;showToast('优化完成')};
+  function refreshLayout(){const title=$('#layoutTitle').value||'文章标题';const body=$('#layoutBody').value||'';$('#layoutPreview').innerHTML=`<div class="article-kicker">孤狼智写 · 公众号排版</div><h1>${title}</h1><div class="preview-meta">2026 年 10 月 15 日</div><div class="image-slot">封面图 / 插图位置</div><p>${body}</p>`}$('#layoutTitle').oninput=refreshLayout;$('#layoutBody').oninput=refreshLayout;$('#clearLayout').onclick=()=>{$('#layoutTitle').value='';$('#layoutBody').value='';refreshLayout()};$('#exportLayout').onclick=()=>showToast('排版内容已导出');refreshLayout();
+  $$('.nav-item').forEach(item=>item.onclick=()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));item.classList.add('active');$$('.view').forEach(x=>x.classList.remove('active'));$('#'+item.dataset.view).classList.add('active');setProgress(item.dataset.view==='titles'?0:100)});$('#saveModel').onclick=()=>showToast('模型配置已保存');
+</script>
+</body>
+</html>
