@@ -21,6 +21,8 @@ DB = DATA_DIR / "studio.sqlite3"
 app = FastAPI(title="孤狼智写本地服务", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4173", "http://localhost:4173"], allow_methods=["*"], allow_headers=["*"])
 app.mount("/studio", StaticFiles(directory=ROOT, html=True), name="studio")
+# Keep the original URL working so existing bookmarks do not break.
+app.mount("/wechat-content-studio", StaticFiles(directory=ROOT, html=True), name="legacy-studio")
 
 
 def now() -> str:
