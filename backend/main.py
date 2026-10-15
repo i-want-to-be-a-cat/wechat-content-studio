@@ -4,6 +4,8 @@ import json
 import os
 import sqlite3
 import uuid
+import asyncio
+import base64
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -165,6 +167,53 @@ async def generate_stability(prompt: str) -> str:
         raise HTTPException(502, f"IMAGE_PROVIDER_UNAVAILABLE: {exc}") from exc
 
 
+async def generate_comfyui(prompt: str) -> str:
+    workflow_file = Path(IMAGE_WORKFLOW_PATH).expanduser()
+    if not workflow_file.exists():
+        raise HTTPException(503, f"IMAGE_WORKFLOW_NOT_FOUND: {workflow_file}")
+    try:
+        workflow = json.loads(workflow_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(500, f"IMAGE_WORKFLOW_INVALID: {exc}") from exc
+    positive_written = False
+    for node in workflow.values():
+        if not isinstance(node, dict) or "inputs" not in node:
+            continue
+        class_type = str(node.get("class_type", ""))
+        text_value = node["inputs"].get("text")
+        if "CLIPTextEncode" in class_type and isinstance(text_value, str) and not positive_written:
+            node["inputs"]["text"] = prompt
+            positive_written = True
+    if not positive_written:
+        raise HTTPException(500, "IMAGE_WORKFLOW_INVALID: no CLIPTextEncode text node found")
+    client_id = str(uuid.uuid4())
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            queued = await client.post(f"{IMAGE_API_BASE_URL}/prompt", json={"prompt": workflow, "client_id": client_id})
+            queued.raise_for_status()
+            prompt_id = queued.json()["prompt_id"]
+            for _ in range(180):
+                await asyncio.sleep(1)
+                history_response = await client.get(f"{IMAGE_API_BASE_URL}/history/{prompt_id}")
+                history_response.raise_for_status()
+                history = history_response.json().get(prompt_id, {})
+                outputs = history.get("outputs", {})
+                for output in outputs.values():
+                    for image in output.get("images", []):
+                        image_response = await client.get(
+                            f"{IMAGE_API_BASE_URL}/view",
+                            params={"filename": image["filename"], "subfolder": image.get("subfolder", ""), "type": image.get("type", "output")},
+                        )
+                        image_response.raise_for_status()
+                        mime = image_response.headers.get("content-type", "image/png")
+                        return f"data:{mime};base64,{base64.b64encode(image_response.content).decode('ascii')}"
+            raise HTTPException(504, "IMAGE_PROVIDER_TIMEOUT: ComfyUI did not finish within 180 seconds")
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(502, f"IMAGE_PROVIDER_ERROR: {exc.response.text[:500]}") from exc
+    except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+        raise HTTPException(502, f"IMAGE_PROVIDER_UNAVAILABLE: {exc}") from exc
+
+
 @app.post("/api/generate/images")
 async def generate_images(request: ImageRequest):
     if IMAGE_PROVIDER == "stability":
@@ -173,7 +222,8 @@ async def generate_images(request: ImageRequest):
     if IMAGE_PROVIDER == "comfyui":
         if not IMAGE_WORKFLOW_PATH:
             raise HTTPException(503, "IMAGE_PROVIDER_NOT_CONFIGURED: set IMAGE_WORKFLOW_PATH to a ComfyUI API workflow")
-        raise HTTPException(501, "COMFYUI_WORKFLOW_ADAPTER_PENDING: configure the exported workflow mapping before use")
+        images = [await generate_comfyui(prompt) for prompt in request.prompts]
+        return {"data": {"provider": IMAGE_PROVIDER, "images": images}}
     raise HTTPException(400, f"UNKNOWN_IMAGE_PROVIDER: {IMAGE_PROVIDER}")
 
 
