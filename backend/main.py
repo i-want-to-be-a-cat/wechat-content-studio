@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("STUDIO_DATA_DIR", str(Path.home() / "Library/Application Support/WechatContentStudio")))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(ROOT / ".env")
 
 DB = DATA_DIR / "studio.sqlite3"
 TEXT_API_BASE_URL = os.environ.get("TEXT_API_BASE_URL", "http://127.0.0.1:11434/v1").rstrip("/")
