@@ -32,7 +32,7 @@ IMAGE_WORKFLOW_PATH = os.environ.get("IMAGE_WORKFLOW_PATH", "")
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY", "")
 STABILITY_ENGINE = os.environ.get("STABILITY_ENGINE", "stable-diffusion-xl-1024-v1-0")
 
-app = FastAPI(title="孤狼智写本地服务", version="2.0.0")
+app = FastAPI(title="柚子很会写本地服务", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:4173", "http://localhost:4173"], allow_methods=["*"], allow_headers=["*"])
 app.mount("/studio", StaticFiles(directory=ROOT, html=True), name="studio")
 # Keep the original URL working so existing bookmarks do not break.
