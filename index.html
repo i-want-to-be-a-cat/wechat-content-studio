@@ -46,7 +46,8 @@
 </div><div class="toast" id="toast"></div>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], toast=$('#toast'), KEY='gulang-v2-state';
-async function api(path, options={}){try{const res=await fetch('/api'+path,{headers:{'content-type':'application/json',...(options.headers||{})},...options});if(!res.ok)throw new Error(`HTTP ${res.status}`);return await res.json()}catch(e){return null}}
+const API_BASE=(new URLSearchParams(location.search).get('api')||localStorage.getItem('studioApiBase')||'').replace(/\/+$/,'');
+async function api(path, options={}){try{const res=await fetch(API_BASE+'/api'+path,{headers:{'content-type':'application/json',...(options.headers||{})},...options});if(!res.ok)throw new Error(`HTTP ${res.status}`);return await res.json()}catch(e){return null}}
 async function remoteText(kind,prompt,maxTokens=2200){const response=await api('/generate/text',{method:'POST',body:JSON.stringify({kind,prompt,temperature:.85,max_tokens:maxTokens})});return response?.data?.content||null}
 function parseJsonObject(text){if(!text)return null;try{return JSON.parse(text)}catch{}const match=text.match(/\{[\s\S]*\}/);if(!match)return null;try{return JSON.parse(match[0])}catch{return null}}
 const defaultState={titles:[],topics:['','','','','',''],articles:[],activeArticleId:null,model:{provider:'OpenAI 兼容接口',modelId:'',baseUrl:'https://api.deepseek.com',hasKey:false},layout:{theme:'plain',headingSize:'18',bodySize:'16',lineHeight:'1.75',title:'为什么很多人学了 AI，工作却没有变轻松？',body:'真正决定效率的，从来不是你收藏了多少工具，而是你有没有把其中一个工具放进自己的工作流里。\n\n先从一个每周都会重复的任务开始。让 AI 帮你完成第一版，再把自己的判断补进去。',images:[]}};
